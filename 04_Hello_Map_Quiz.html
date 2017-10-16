@@ -16,7 +16,13 @@ API Course, Lesson 1 -->
    <script>
      // TODO: Create a map variable
     var map;
+
+    //create the marker array
+
+    var markers = [];
      // TODO: Complete the following function to initialize the map
+
+
      function initMap() {
        // TODO: use a constructor to create a new map JS object. You can use the coordinates
        // we used, 40.7413549, -73.99802439999996 or your own!
@@ -25,22 +31,72 @@ API Course, Lesson 1 -->
          zoom:13
        });
 
-       var punacha = {lat:12.71,lng:75.16};
+       //These are the places that will be shown to the user
+       //Normally we would have these in a database instead
 
-       var marker = new google.maps.Marker({
-         position: punacha,
-         map: map ,
-         title: 'First Marker!'
+       var locations = [
+          {title:'Puttur', location : {lat: 12.7638 , lng: 75.2093 }},
+          {title:'Vitla', location : {lat: 12.7650, lng: 75.1026 }},
+          {title: 'Punacha', location : { lat : 12.71349 , lng: 75.1670}},
+          {title: 'Uppinangadi', location : { lat: 12.8364 , lng: 75.2480 }},
+          {title: 'Kalladka', location : { lat:12.8416 ,lng: 75.0726 }}
+    ];
 
-       });
-       var infoWindow = new google.maps.InfoWindow({
-         content: 'Your home is nearby here, can you search around!!?'
-       });
+    var largeInfoWindow = new google.maps.InfoWindow();
+    var bounds = new google.maps.LatLngBounds();
 
-       marker.addListener('click',function(){
-         infoWindow.open(map,marker);
-       });
-     }
+    //The following creates the array of markers using location array.
+
+    for( var i=0; i<locations.length; i++){
+      //get the position of the location array
+
+      var position = locations[i].location;
+      var title = locations[i].title;
+      //creates a marker per locations and puts into markers array 
+
+      var marker = new google.maps.Marker({
+        map: map,
+        position: position,
+        title: title,
+        animation: google.maps.Animation.DROP,
+        id:i
+      });
+
+      //push the markers to our array of markers
+      markers.push(marker);
+
+      //extend the boundaries of of the map for each marker
+      bounds.extend(marker.position);
+
+      //create an onclick event to open info window at each marker
+
+      marker.addListener('click',function(){
+        populateInfoWindow(this, largeInfoWindow);
+      });
+    }
+//this function populates the infoWindow when the marker is clicked, we will only allow
+//one window which will open at the marker that is clicked, and populate based
+//on that marker position
+
+map.fitBounds(bounds);
+
+function populateInfoWindow(marker,infoWindow){
+  //check to make sure the infoWindow is not open on this marker
+
+  if(infoWindow.marker != marker){
+    infoWindow.marker = marker;
+    infoWindow.setContent('<div>' + marker.title + '</div>');
+    infoWindow.open(map,marker);
+    //make sure the marker property is closed.
+
+    infoWindow.addListener('closeclick',function(){
+      infoWindow.setMarker(null);
+    })
+  }
+}
+
+
+   }
      </script>
    <script async defer
       src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBG86L5XZDpfiXZkGmUXBacse8jjggQuwE&v=3&callback=initMap">
