@@ -229,7 +229,38 @@ API Course, Lesson 1 -->
 
           infoWindow.addListener('closeclick',function(){
             infoWindow.setMarker(null);
-          })
+          });
+          var streetViewService = new google.maps.StreetViewService();
+          var radius = 50;
+          //in case the status is OK,which means the pano was found,compute
+          //position of the streetview image,then calculate the heading,and
+          //then get a panaroma from that and set the options
+          function getStreetView(view,status){
+            if(status == google.maps.StreetViewStatus.OK){
+              var nearStreetViewLocation = data.location.latLng;
+              var heading = google.maps.geometry.spherical.computeHeading(
+                nearStreetViewLocation,marker.position);
+              infoWindow.setContent('<div>' + marker.title + '</div>' + '<div id="pano"></div>' );
+              var panoramaOptions ={
+                position:nearStreetViewLocation,
+                pov:{
+                  heading:heading,
+                  pitch:30
+                }
+              };
+              var panorama = new google.maps.streetViewPanorama(
+                document.getElementById('pano').panoramaOptions);
+              
+            }else{
+              infoWindow.setContent('<div>'+ marker.title + '</div>'+
+              '<div> No Street View Found, Sorry!! </div>')
+            }
+          }
+          //Use streetView service to get the closest streetview image within
+          //50 meters of the marker position
+          streetViewService.getPanoramaByLocation(marker.position,radius,getStreetView); 
+          //open the infowindow on the correct marker.
+          infoWindow.open(map,marker);
         }
       }
 
@@ -268,7 +299,7 @@ API Course, Lesson 1 -->
       }
     </script>
     <script async defer
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBG86L5XZDpfiXZkGmUXBacse8jjggQuwE&v=3&callback=initMap">
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBG86L5XZDpfiXZkGmUXBacse8jjggQuwE&libraries=geometry&v=3&callback=initMap">
     </script>
 
  </body>
