@@ -3,27 +3,56 @@ API Course, Lesson 1 -->
 <!DOCTYPE html>
 <html>
  <head>
- <!-- styles put here, but you can include a CSS file and reference it instead! -->
-   <style type="text/css">
-     html, body {font-family:Arial,sans-serif; height: 100%; margin: 0; padding: 0; }
-     #map { bottom: 0px;
-            height: 100%; 
-            left: 362px;
-            position: absolute;
-            right:0px;
-            }
+    <!-- styles put here, but you can include a CSS file and reference it instead! -->
+    <style type="text/css">
+    html, 
+    body {
+      font-family:Arial,sans-serif; 
+      height: 100%; 
+      margin: 0; 
+      padding: 0; 
+    }
 
-     .options-box {
-       background : #fff;
-       border: 1px solid #999;
-       border-radius : 3px;
-       height: 100%;
-       line-height :35px;
-       padding: 10px 10px 30px 10px;
-       text-align: left;
-       width: 340px;
-     }
-   </style>
+    .container {
+      height: 100%;
+      position: relative;
+    }
+
+    input {
+      font-size: 12px;
+    }
+
+    h1{
+      color: #525454;
+      font-size: 22px;
+      margin: 0 0 10px 0;
+      text-align: center;
+    }
+
+    #map { 
+      bottom: 0px;
+      height: 100%; 
+      left: 362px;
+      position: absolute;
+      right:0px;
+    }
+
+    .options-box {
+      background : #fff;
+      border: 1px solid #999;
+      border-radius : 3px;
+      height: 100%;
+      line-height :35px;
+      padding: 10px 10px 30px 10px;
+      text-align: left;
+      width: 340px;
+    }
+
+    #hide-listings,
+    #show-listings {
+      width: 48%
+    }
+  </style>
  </head>
  <body>
     <div class="container">
@@ -37,127 +66,210 @@ API Course, Lesson 1 -->
       <!-- TODO 1: Create a place to put the map in the HTML-->
       <div id="map"></div>
     </div>
-   
-   
-   <script>
-     // TODO: Create a map variable
-    var map;
+    <script>
+      // TODO: Create a map variable
+      var map;
 
-    //create the marker array
+      //create the marker array
+      var markers = [];
 
-    var markers = [];
      // TODO: Complete the following function to initialize the map
+      function initMap() {
+        //create a styles array to use with the map
+        var styles =[
+          { 
+            featuretype: 'water',
+            stylers:[
+              { color: '#19a0d8' }
+            ]
+          },{
+            featuretype: "administrative",
+            elementType: 'labels.text.stroke',
+            stylers: [
+              { color:'#ffffff' },
+              { weight: 6 }
+            ]
+          },{
+            featuretype:'administrative',
+            elementType:'labels.text.fill',
+            stylers: [
+              { color: '#e85113' }
+            ]
+          },{
+            featuretype:'road.highway',
+            elementType:'geometry.stroke',
+            stylers:[
+              { color:'#efe9e4' },
+              { lightness: -40 }
+            ]
+          },{
+            featuretype:'transit.station',
+            stylers:[
+              { weight:9 },
+              { hue:'#e85113' }
+            ]
+          },{
+            featuretype:'road.highway',
+            elementType:'labels.icon',
+            stylers:[
+              { visibility:'off' }
+            ]
+          },{
+            featureType: 'water',
+            elementType: 'labels.text.stroke',
+              stylers: [
+                { lightness: 100 }
+              ]
+           },{
+            featureType: 'water',
+            elementType: 'labels.text.fill',
+            stylers: [
+              { lightness: -100 }
+            ]
+          },{
+            featureType: 'poi',
+            elementType: 'geometry',
+            stylers: [
+              { visibility: 'on' },
+              { color: '#f0e4d3' }
+            ]
+          },{
+            featureType: 'road.highway',
+            elementType: 'geometry.fill',
+            stylers: [
+              { color: '#efe9e4' },
+              { lightness: -25 }
+            ]
+          }
+        ];
+        //  use a constructor to create a new map JS object. You can use the coordinates
+        // we used, 40.7413549, -73.99802439999996 or your own!
+        map = new google.maps.Map(document.getElementById('map'),{
+          center:{lat:12.7134930,lng:75.1670680},
+          zoom: 13,
+          styles: styles,
+          mapTypeControl: false
+        });
 
-
-     function initMap() {
-
-       //create a styles array to use with the map
-      var styles =[
-        { 
-
-        }
-      ]
-       // TODO: use a constructor to create a new map JS object. You can use the coordinates
-       // we used, 40.7413549, -73.99802439999996 or your own!
-       map = new google.maps.Map(document.getElementById('map'),{
-         center:{lat:12.7134930,lng:75.1670680},
-         zoom:13
-       });
-
-       //These are the places that will be shown to the user
-       //Normally we would have these in a database instead
-
-       var locations = [
+        //These are the places that will be shown to the user
+        //Normally we would have these in a database instead
+        var locations = [
           {title:'Puttur', location : {lat: 12.7638 , lng: 75.2093 },distance : '12km'},
           {title:'Vitla', location : {lat: 12.7650, lng: 75.1026 },distance: '10km'},
           {title: 'Punacha', location : { lat : 12.71349 , lng: 75.1670},distance: '0km'},
           {title: 'Uppinangadi', location : { lat: 12.8364 , lng: 75.2480 },distance: '21km'},
           {title: 'Kalladka', location : { lat:12.8416 ,lng: 75.0726 },distance: '19km'}
-    ];
+        ];
 
-    var largeInfoWindow = new google.maps.InfoWindow();
-   
+        var largeInfoWindow = new google.maps.InfoWindow();
+    
+        //style the markers a bit.this will be our listing marker icon.
+        var defaultIcon = makeMarkerIcon('0091ff');
+
+        //Create the "highlighted location" marker color when the user hovers over it
+        var highlightedIcon = makeMarkerIcon('FFFF24');
+
+        //The following creates the array of markers using location array.
+
+        for(var i=0; i<locations.length; i++){
+          //get the position of the location array
+          var position = locations[i].location;
+          var title = locations[i].title;
+          var distance = locations[i].distance;
+
+          //creates a marker per locations and puts into markers array 
+          var marker = new google.maps.Marker({
+            map: map,
+            position: position,
+            title: title,
+            icon:defaultIcon,
+            distance: distance,
+            animation: google.maps.Animation.DROP,
+            id:i
+          });
+
+          //push the markers to our array of markers
+          markers.push(marker);
+
+          //create an onclick event to open info window at each marker
+          marker.addListener('click',function(){
+            populateInfoWindow(this, largeInfoWindow);
+          });
+
+          //two event listeners - one for mouseover and one for mouseout
+          //to change color back and forth
+          marker.addListener('mouseover',function(){
+            this.setIcon(highlightedIcon);
+          });
+
+          marker.addListener('mouseout',function(){
+            this.setIcon(defaultIcon);
+          });
+        } 
+
+        document.getElementById('show-listings').addEventListener('click',showListings);
+        document.getElementById('hide-listings').addEventListener('click',hideListings);
+      }
+
+      //this function populates the infoWindow when the marker is clicked, we will only allow
+      //one window which will open at the marker that is clicked, and populate based
+      //on that marker position
+
+      function populateInfoWindow(marker,infoWindow){
+
+        var contentString = '<div>' + marker.title + '</div>' + '<div>' + marker.position + '</div>'
+        + '<div>' + marker.distance + ' from home' + '</div>';
+        //check to make sure the infoWindow is not open on this marker
+
+        if(infoWindow.marker != marker){
+          infoWindow.marker = marker;
+          infoWindow.setContent(contentString);
+          infoWindow.open(map,marker);
+          //make sure the marker property is closed.
+
+          infoWindow.addListener('closeclick',function(){
+            infoWindow.setMarker(null);
+          })
+        }
+      }
+
+      //This function will loop through the markers array and display them all
+      function showListings(){
   
+        var bounds = new google.maps.LatLngBounds();
+        //extend the boundaries of of the map for each marker
 
-    //The following creates the array of markers using location array.
+        for(var i=0 ; i< markers.length ; i++){
+          markers[i].setMap(map);
+          bounds.extend(markers[i].position);
+        }
+        map.fitBounds(bounds);
+      }
 
-    for( var i=0; i<locations.length; i++){
-      //get the position of the location array
+      function hideListings(){
+        for(var i=0; i<markers.length; i++){
+          markers[i].setMap(null);
+        }
+      }
 
-      var position = locations[i].location;
-      var title = locations[i].title;
-      var distance = locations[i].distance;
-      //creates a marker per locations and puts into markers array 
+      // This function takes in a COLOR, and then creates a new marker
+      // icon of that color. The icon will be 21 px wide by 34 high, have an origin
+      // of 0, 0 and be anchored at 10, 34).
 
-      var marker = new google.maps.Marker({
-        map: map,
-        position: position,
-        title: title,
-        distance: distance,
-        animation: google.maps.Animation.DROP,
-        id:i
-      });
-
-      //push the markers to our array of markers
-      markers.push(marker);
-
-      //create an onclick event to open info window at each marker
-
-      marker.addListener('click',function(){
-        populateInfoWindow(this, largeInfoWindow);
-      });
-    }
-    document.getElementById('show-listings').addEventListener('click',showListings);
-    document.getElementById('hide-listings').addEventListener('click',hideListings);
-}
-
-//this function populates the infoWindow when the marker is clicked, we will only allow
-//one window which will open at the marker that is clicked, and populate based
-//on that marker position
-
-function populateInfoWindow(marker,infoWindow){
-
-  var contentString = '<div>' + marker.title + '</div>' + '<div>' + marker.position + '</div>'
-  + '<div>' + marker.distance + ' from home' + '</div>';
-  //check to make sure the infoWindow is not open on this marker
-
-  if(infoWindow.marker != marker){
-    infoWindow.marker = marker;
-    infoWindow.setContent(contentString);
-    infoWindow.open(map,marker);
-    //make sure the marker property is closed.
-
-    infoWindow.addListener('closeclick',function(){
-      infoWindow.setMarker(null);
-    })
-  }
-
-  
-}
-
-//This function will loop through the markers array and display them all
-
-function showListings(){
-  
-    var bounds = new google.maps.LatLngBounds();
-   //extend the boundaries of of the map for each marker
-
-   for(var i=0 ; i< markers.length ; i++){
-    markers[i].setMap(map);
-    bounds.extend(markers[i].position);
-}
-   map.fitBounds(bounds);
-}
-
-function hideListings(){
-  for(var i=0; i<markers.length; i++){
-    markers[i].setMap(null);
-  }
-}
- 
-     </script>
-   <script async defer
+      function makeMarkerIcon(markerColor){
+        var markerImage = new google.maps.MarkerImage(
+           'http://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|' + markerColor +
+           '|40|_|%E2%80%A2',
+           new google.maps.Size(21,34),
+           new google.maps.Point(0,0),
+           new google.maps.Point(10,34),
+           new google.maps.Size(21,34));
+        return markerImage;
+      }
+    </script>
+    <script async defer
       src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBG86L5XZDpfiXZkGmUXBacse8jjggQuwE&v=3&callback=initMap">
     </script>
+
  </body>
 </html>
