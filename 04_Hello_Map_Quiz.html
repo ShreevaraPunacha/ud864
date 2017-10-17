@@ -50,6 +50,13 @@ API Course, Lesson 1 -->
 
 
      function initMap() {
+
+       //create a styles array to use with the map
+      var styles =[
+        { 
+
+        }
+      ]
        // TODO: use a constructor to create a new map JS object. You can use the coordinates
        // we used, 40.7413549, -73.99802439999996 or your own!
        map = new google.maps.Map(document.getElementById('map'),{
@@ -61,15 +68,16 @@ API Course, Lesson 1 -->
        //Normally we would have these in a database instead
 
        var locations = [
-          {title:'Puttur', location : {lat: 12.7638 , lng: 75.2093 }},
-          {title:'Vitla', location : {lat: 12.7650, lng: 75.1026 }},
-          {title: 'Punacha', location : { lat : 12.71349 , lng: 75.1670}},
-          {title: 'Uppinangadi', location : { lat: 12.8364 , lng: 75.2480 }},
-          {title: 'Kalladka', location : { lat:12.8416 ,lng: 75.0726 }}
+          {title:'Puttur', location : {lat: 12.7638 , lng: 75.2093 },distance : '12km'},
+          {title:'Vitla', location : {lat: 12.7650, lng: 75.1026 },distance: '10km'},
+          {title: 'Punacha', location : { lat : 12.71349 , lng: 75.1670},distance: '0km'},
+          {title: 'Uppinangadi', location : { lat: 12.8364 , lng: 75.2480 },distance: '21km'},
+          {title: 'Kalladka', location : { lat:12.8416 ,lng: 75.0726 },distance: '19km'}
     ];
 
     var largeInfoWindow = new google.maps.InfoWindow();
    
+  
 
     //The following creates the array of markers using location array.
 
@@ -78,12 +86,14 @@ API Course, Lesson 1 -->
 
       var position = locations[i].location;
       var title = locations[i].title;
+      var distance = locations[i].distance;
       //creates a marker per locations and puts into markers array 
 
       var marker = new google.maps.Marker({
         map: map,
         position: position,
         title: title,
+        distance: distance,
         animation: google.maps.Animation.DROP,
         id:i
       });
@@ -107,7 +117,8 @@ API Course, Lesson 1 -->
 
 function populateInfoWindow(marker,infoWindow){
 
-  var contentString = '<div>' + marker.title + '</div>' + '<div>' + marker.position + '</div>';
+  var contentString = '<div>' + marker.title + '</div>' + '<div>' + marker.position + '</div>'
+  + '<div>' + marker.distance + ' from home' + '</div>';
   //check to make sure the infoWindow is not open on this marker
 
   if(infoWindow.marker != marker){
