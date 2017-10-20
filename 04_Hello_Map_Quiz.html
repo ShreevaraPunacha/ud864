@@ -435,13 +435,13 @@ API Course, Lesson 1 -->
           geocoder.geocode(
             {
               address: address,
-              componentRestrictions: {locality:'Mangalore'}
+              componentRestrictions: {locality:'Punacha'}
             },function(results,status){
               if(status == google.maps.GeocoderStatus.OK){
                 map.setCenter(results[0].geometry.location);
                 map.setZoom(14);
               }else{
-                window.alert('We couldnot find that location!! Sorry');
+                window.alert('We could not find that location!! Sorry');
               }
             }
           );
@@ -518,10 +518,8 @@ API Course, Lesson 1 -->
 
       function displayMarkersWithinTime(response){
         var maxDuration = document.getElementById('max-duration').value;
-        console.log(maxDuration);
         var origins = response.originAddresses;
         var destinations = response.destinationAddress;
-        console.log(response);
         //Parse through the results, and get the distance and duration of each.
         // Because there might be multiple origins and destinations we have a nested loop
         //Then,make sure atleast 1 result was found.
@@ -547,7 +545,9 @@ API Course, Lesson 1 -->
                 //Create a mini infowindow to open immediately and contain the
                 //distance and duration
                 var infoWindow = new google.maps.InfoWindow({
-                  content : durationText + ' away, ' + distanceText
+                  content : durationText + ' away, ' + distanceText +
+                  '<div><input type=\"button\" value=\"View Route\" onclick = '+
+                  '\"displayDirections(&quot;' + origins[i] + '&quot;);\"></input></div>'
                 });
 
                 infoWindow.open(map, markers[i]);
@@ -566,6 +566,39 @@ API Course, Lesson 1 -->
           window.alert('We could not find any locations within that distance!');
         }
       }
+
+      //This function is in response to the iser selecting 'show route' on one of the markers
+      //within the calculated distance.This will display the route on
+      //the map
+
+      function displayDirections(origin){
+        hideListings();
+        var directionsService = new google.maps.DirectionsService;
+        //Get the destination address from the user entered value
+        var destinationAddress = document.getElementById('search-within-time-text').value;
+        //Get Mode again from the user enterd value.
+        var mode = document.getElementById('mode').value;
+        directionsService.route({
+          //The origin is passed in marker's position
+          origin: origin,
+          //Thw destination is user entered value
+          destination: destinationAddress,
+          travelMode: google.maps.TravelMode[mode],
+        },function(response,status){
+          if(status == google.maps.DirectionsStatus.OK){
+            var directionsDisplay = new google.maps.DirectionsRenderer({
+              map:map,
+              directions: response,
+              draggable: true,
+              polylineOptions: {
+                strokeColor: 'green'
+              }
+            });
+          }else{
+            window.alert('Directions request failed due to ' + status);
+          }
+        });
+      } 
     </script>
     <script async defer
       src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBG86L5XZDpfiXZkGmUXBacse8jjggQuwE&libraries=geometry,drawing&v=3&callback=initMap">
