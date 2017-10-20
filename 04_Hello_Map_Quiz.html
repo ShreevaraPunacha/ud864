@@ -681,17 +681,25 @@ API Course, Lesson 1 -->
             origin: new google.maps.Point(0,0),
             scaledsize: new google.maps.Size(25,25)
           };
-          //create a marker fpr each place.
+          //create a marker for each place.
           var marker = new google.maps.Marker({
             map: map,
             icon: icon,
             title: place.name,
             position: place.geometry.location,
-            id: place.id
+            id: place.place_id
           });
+
+          //Create a single InfoWindow to be used with the place ddetails info 
+          //so that only one is open at once.
+          var placeInfoWindow = new google.maps.InfoWindow();
           //If a marker is clicked , do a place details search on it in the next function
           marker.addListener('click',function(){
-            getPlacesDetails(this,place);
+            if (placeInfoWindow.marker == this){
+              console.log("This info window is already on this marker!");
+            }else{
+            getPlacesDetails(this,placeInfoWindow);
+            }
           });
           placemakers.push(marker);
           if(place.geometry.viewport){
@@ -702,6 +710,55 @@ API Course, Lesson 1 -->
           }
         }
         map.fitBounds(bounds);
+      }
+
+      // This is the PLACE DETAILS search - it's the most most detailed so it's only
+      //executed when the marker is selected,indicating the user wants
+      //more details about the place.
+
+      function getPlacesDetails(marker, infoWindow){
+        var service = new google.maps.places.PlacesService(map);
+        service.getDetails({
+          placeId: marker.id
+        }, function(place , status){
+          if(status == google.maps.places.PlacesServiceStatus.OK){
+            //set the marker property on this infoWindow so it is not created again.
+            infoWindow.marker = marker;
+            var innerHTML = '<div>';
+            if(place.name){
+              innerHTML += '<strong>' + place.name + '</strong>';
+            }
+            if(place.formatted_address){
+              innerHTML += '<br>'+ place.formatted_address;
+            }
+            if(place.formatted_phone_number){
+              innerHTML += '<br>' + place.formatted_phone_number;
+            }
+            if(place.opening_hours){
+              innerHTML += '<br><br><strong>Hours:</strong><br>'+
+                place.opening_hours.weakday_text[0] + '<br'+
+                place.opening_hours.weakday_text[1] + '<br' +
+                place.opening_hours.weakday_text[2] + '<br' +
+                place.opening_hours.weakday_text[3] + '<br' +
+                place.opening_hours.weakday_text[4] + '<br' +
+                place.opening_hours.weakday_text[5] + '<br' +
+                place.opening_hours.weakday_text[6];
+            }
+            if(place.photos){
+              innerHTML += '<br><br><img src="' + place.photos[0].getUrl(
+                { maxHeight: 100,maxWidth: 200}) + '">';
+            }
+            innerHTML += '</div>';
+            infoWindow.setContent(innerHTML);
+            infoWindow.open(map,marker);
+            //make sure the marker property is cleared if the infowindow is closed
+            infoWindow.addListener('closeclick',function(){
+              infoWindow.marker = null ;
+            });
+          }else{
+            console.log("status: not OK");
+          }
+        });
       }
     </script>
     <script async defer
