@@ -218,6 +218,18 @@ API Course, Lesson 1 -->
           mapTypeControl: false
         });
 
+        //This autocomplete is for use in the search within time entry box
+        var timeAutoComplete = new google.maps.places.Autocomplete(
+          document.getElementById('search-within-time-text')
+        );
+
+        //This autocomplete is for use in the geocoder entry box
+        var zoomAutoComplete = new google.maps.places.Autocomplete(
+          document.getElementById('zoom-to-area-text')
+        );
+
+        zoomAutoComplete.bindTo('bounds', map);
+
         //These are the places that will be shown to the user
         //Normally we would have these in a database instead
         var locations = [
@@ -601,7 +613,7 @@ API Course, Lesson 1 -->
       } 
     </script>
     <script async defer
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBG86L5XZDpfiXZkGmUXBacse8jjggQuwE&libraries=geometry,drawing&v=3&callback=initMap">
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBG86L5XZDpfiXZkGmUXBacse8jjggQuwE&libraries=places,geometry,drawing&v=3&callback=initMap">
     </script>
   </body>
 </html>
